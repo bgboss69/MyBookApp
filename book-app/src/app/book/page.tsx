@@ -1,40 +1,55 @@
-'use client'
-
-import { useBooks } from '@/providers/book-context'
+// app/book/page.tsx
 import Link from 'next/link'
 
-export default function BookListPage() {
-  const { books } = useBooks()
+interface Book {
+  id: number
+  title: string
+  author: string
+  genre: string
+  description: string
+  isbn: string
+  published: string
+  publisher: string
+  image: string
+}
+
+async function getBooks(): Promise<Book[]> {
+  const res = await fetch('https://fakerapi.it/api/v1/books?_quantity=10', { cache: 'no-store' })
+  const json = await res.json()
+  return json.data
+}
+
+export default async function BookListPage() {
+  const books = await getBooks()
+  const booksDataStr = encodeURIComponent(JSON.stringify(books))
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-6">Book List</h1>
-      <table className="w-full border-collapse border border-gray-300">
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Books List</h1>
+      <table className="min-w-full border border-gray-300">
         <thead>
           <tr className="bg-gray-100">
-            <th className="border border-gray-300 p-2">Title</th>
-            <th className="border border-gray-300 p-2">Author</th>
-            <th className="border border-gray-300 p-2">Genre</th>
-            <th className="border border-gray-300 p-2">Description</th>
-            <th className="border border-gray-300 p-2">ISBN</th>
-            <th className="border border-gray-300 p-2">Published</th>
-            <th className="border border-gray-300 p-2">Publisher</th>
+            <th className="p-2 border border-gray-300">Title</th>
+            <th className="p-2 border border-gray-300">Author</th>
+            <th className="p-2 border border-gray-300">Genre</th>
+            <th className="p-2 border border-gray-300">ISBN</th>
+            <th className="p-2 border border-gray-300">Published</th>
+            <th className="p-2 border border-gray-300">Publisher</th>
           </tr>
         </thead>
         <tbody>
           {books.map(book => (
-            <tr key={book.id} className="hover:bg-gray-50 cursor-pointer">
-              <td className="border border-gray-300 p-2 text-blue-600 underline">
-                <Link href={`/book/${book.id}`}>{book.title}</Link>
+            <tr key={book.id} className="hover:bg-gray-50">
+              <td className="p-2 border border-gray-300">
+                <Link href={`/book/${book.id}?data=${booksDataStr}`} className="text-blue-600 hover:underline">
+                  {book.title}
+                </Link>
               </td>
-              <td className="border border-gray-300 p-2">{book.author}</td>
-              <td className="border border-gray-300 p-2">{book.genre}</td>
-              <td className="border border-gray-300 p-2 truncate max-w-xs" title={book.description}>
-                {book.description}
-              </td>
-              <td className="border border-gray-300 p-2">{book.isbn}</td>
-              <td className="border border-gray-300 p-2">{new Date(book.published).toLocaleDateString('en-GB')}</td>
-              <td className="border border-gray-300 p-2">{book.publisher}</td>
+              <td className="p-2 border border-gray-300">{book.author}</td>
+              <td className="p-2 border border-gray-300">{book.genre}</td>
+              <td className="p-2 border border-gray-300">{book.isbn}</td>
+              <td className="p-2 border border-gray-300">{new Date(book.published).toLocaleDateString()}</td>
+              <td className="p-2 border border-gray-300">{book.publisher}</td>
             </tr>
           ))}
         </tbody>
